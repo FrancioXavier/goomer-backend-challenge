@@ -4,6 +4,7 @@ const app = express();
 const route = Router();
 
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 route.get('/', (req:Request, res: Response, next: NextFunction) => {
     res.json({message: "Hello world from Typescript."})
