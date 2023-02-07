@@ -7,51 +7,64 @@ class RestaurantRepository{
     async findAllRestaurants(): Promise<Restaurant[]> {
         const query = `
         SELECT 
-            restaurantPhoto, 
+            Photo, 
             restaurantName, 
-            restaurantAdress, 
-            restaurantOperationTime 
-        FROM restaurants
+            Adress,
+            weekdaysworkinghours_open,
+            weekdaysworkinghours_end,
+            WeekendWorkingHours_open,
+            WeekendWorkingHours_end 
+        FROM restaurants_final
         `;
 
         const { rows } = await  db.query<Restaurant>(query);
+        
         return rows || [];
     }
 
     async findById(uuid:string): Promise<Restaurant> {
         const query = `
             SELECT 
-                restaurantPhoto, 
+                Photo, 
                 restaurantName, 
-                restaurantAdress, 
-                restaurantOperationTime 
-            FROM restaurants WHERE uuid = $1
+                Adress,
+                weekdaysworkinghours_open,
+                weekdaysworkinghours_end,
+                WeekendWorkingHours_open,
+                WeekendWorkingHours_end  
+            FROM restaurants_final WHERE uuid = $1
         `;
 
         const values = [uuid];
         const { rows } = await db.query<Restaurant>(query, values);
-        const [ username ] = rows;
+        const [ restaurant ] = rows;
 
-        return username;
+        return restaurant;
     }
 
     async addRestaurant(restaurant:Restaurant): Promise<string>{
 
         const script = `
-            INSERT INTO restaurants(
-                restaurantPhoto, 
+            INSERT INTO restaurants_final(
+                Photo, 
                 restaurantName, 
-                restaurantAdress, 
-                restaurantOperationTime
+                Adress,
+                weekdaysworkinghours_open,
+                weekdaysworkinghours_end,
+                WeekendWorkingHours_open,
+                WeekendWorkingHours_end 
             ) VALUES (
-                $1, $2, $3, $4
+                $1, $2, $3, $4, $5, $6, $7
             ) RETURNING uuid
         `;
         
         const values = [restaurant.photo, 
-                        restaurant.name,
+                        restaurant.restaurantname,
                         restaurant.adress,
-                        restaurant.operationTime
+                        restaurant.weekdaysworkinghours_open,
+                        restaurant.weekdaysworkinghours_end,
+                        restaurant.weekendworkinghours_open,
+                        restaurant.weekendworkinghours_end
         ];
 
         const { rows } = await db.query<{uuid:string}>(script, values);
@@ -62,21 +75,27 @@ class RestaurantRepository{
 
     async updateRestaurant(restaurant:Restaurant): Promise<void>{
         const query = `
-            UPDATE restaurants
+            UPDATE restaurants_final
             SET
-                restaurantPhoto = $1,
+                Photo = $1,
                 restaurantName = $2,
-                restaurantAdress = $3,
-                restaurantOperationTime = $4
-            WHERE uuid = $5
+                Adress = $3,
+                weekdaysworkinghours_open = $4,
+                weekdaysworkinghours_end = $5,
+                WeekendWorkingHours_open = $6,
+                WeekendWorkingHours_end = $7
+            WHERE uuid = $8
         `;
 
         const values = [
-            restaurant.photo, 
-            restaurant.name, 
-            restaurant.adress, 
-            restaurant.operationTime, 
-            restaurant.uuid
+                        restaurant.photo, 
+                        restaurant.restaurantname,
+                        restaurant.adress,
+                        restaurant.weekdaysworkinghours_open,
+                        restaurant.weekdaysworkinghours_end,
+                        restaurant.weekendworkinghours_open,
+                        restaurant.weekendworkinghours_end,
+                        restaurant.uuid
         ];
 
         await db.query(query, values);
@@ -84,7 +103,7 @@ class RestaurantRepository{
 
     async deleteRestaurant(uuid:string): Promise<void>{
         const query = `
-            DELETE FROM restaurants
+            DELETE FROM restaurants_final
             WHERE uuid = $1
         `;
 
