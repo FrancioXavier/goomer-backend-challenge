@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 import restaurantRoute from './routes/restaurantRoutes';
+import productRoute from './routes/productRoutes'
 
 
 const app = express();
@@ -12,6 +13,7 @@ route.get('/', (req:Request, res: Response, next: NextFunction) => {
     res.json({message: "Hello world from Typescript."})
 });
 app.use('/restaurants', restaurantRoute);
+app.use('/products', productRoute);
 
 app.use(route);
 

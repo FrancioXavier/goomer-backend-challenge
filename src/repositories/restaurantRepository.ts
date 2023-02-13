@@ -14,7 +14,7 @@ class RestaurantRepository{
             weekdaysworkinghours_end,
             WeekendWorkingHours_open,
             WeekendWorkingHours_end 
-        FROM restaurants_final
+        FROM restaurantsFinal
         `;
 
         const { rows } = await  db.query<Restaurant>(query);
@@ -32,7 +32,7 @@ class RestaurantRepository{
                 weekdaysworkinghours_end,
                 WeekendWorkingHours_open,
                 WeekendWorkingHours_end  
-            FROM restaurants_final WHERE uuid = $1
+            FROM restaurantsFinal WHERE uuid = $1
         `;
 
         const values = [uuid];
@@ -45,7 +45,7 @@ class RestaurantRepository{
     async addRestaurant(restaurant:Restaurant): Promise<string>{
 
         const script = `
-            INSERT INTO restaurants_final(
+            INSERT INTO restaurantsFinal(
                 Photo, 
                 restaurantName, 
                 Adress,
@@ -75,7 +75,7 @@ class RestaurantRepository{
 
     async updateRestaurant(restaurant:Restaurant): Promise<void>{
         const query = `
-            UPDATE restaurants_final
+            UPDATE restaurantsFinal
             SET
                 Photo = $1,
                 restaurantName = $2,
@@ -103,7 +103,7 @@ class RestaurantRepository{
 
     async deleteRestaurant(uuid:string): Promise<void>{
         const query = `
-            DELETE FROM restaurants_final
+            DELETE FROM restaurantsFinal
             WHERE uuid = $1
         `;
 
