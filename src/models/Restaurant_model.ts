@@ -14,11 +14,11 @@ type Restaurant = {
     category: string;
     isinpromotion: boolean;
     promotionDescription: string;
-    promotionalPrice: string;
-    promotionDay_open: string;
-    promotionDay_end: string;
-    promotionHours_open: string;
-    promotionHours_end: string;
+    promotionalprice: string;
+    promotionday_open: string;
+    promotionday_end: string;
+    promotionhours_open: string;
+    promotionhours_end: string;
 }
 
 export default Restaurant;

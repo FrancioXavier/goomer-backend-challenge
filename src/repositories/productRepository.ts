@@ -1,4 +1,5 @@
 import db from "../db";
+import Product from "../models/Product_model";
 import Restaurant from "../models/Restaurant_model";
 
 class ProductRepository{
@@ -30,10 +31,44 @@ class ProductRepository{
         return rows || [];
     }
 
-    async updateProduct(uuid: string){
+    async insertProduct(product: Product): Promise<string>{
         const query = `
-            
+                INSERT INTO products_4(
+                    uuid_restaurant,
+                    productphoto,
+                    productname,
+                    productprice,
+                    category,
+                    isinpromotion,
+                    promotionDescription,
+                    promotionalPrice,
+                    promotionDay_open,
+                    promotionDay_end,
+                    promotionHours_open,
+                    promotionHours_end
+                )VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                RETURNING product_uuid
         `
+
+        const values = [
+            product.uuid_restaurant,
+            product.productphoto,
+            product.productname,
+            product.productprice,
+            product.category,
+            product.isinpromotion,
+            product.promotiondescription,
+            product.promotionalprice,
+            product.promotionday_open,
+            product.promotionday_end,
+            product.promotionhours_open,
+            product.promotionhours_end
+        ]
+
+        const { rows } = await db.query<{uuid: string}>(query, values);
+        const [ newProduct ] = rows;
+
+        return newProduct.uuid
     };
 }
 
