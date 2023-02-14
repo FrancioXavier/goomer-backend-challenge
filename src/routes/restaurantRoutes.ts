@@ -1,4 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
+import textFormatter from '../controllers/textFormatter';
+import Error_handler from '../errors/errors';
 import restaurantRepository from '../repositories/restaurantRepository';
 
 const restaurantRoute = Router();
@@ -16,7 +18,7 @@ restaurantRoute.get('/', async (req:Request, res:Response, next: NextFunction) =
             name: restaurant.restaurantname,
             Photo: restaurant.photo,
             Adress: restaurant.adress,
-            Working_Hours: `De segunda à sexta das ${time[0][0]}:${time[0][1]} as ${time[1][0]}:${time[1][1]} e de sábado à domingo de ${time[2][0]}:${time[2][1]} as ${time[3][0]}:${time[3][1]}`
+            Working_Hours: `${textFormatter.hourTextResponse(time, true)}`
         };
 
         return res_obj;
@@ -37,7 +39,7 @@ restaurantRoute.get('/:uuid', async (req: Request, res: Response, next: NextFunc
         Name: findOneRestaurant.restaurantname,
         Photo: findOneRestaurant.photo,
         Adress: findOneRestaurant.adress,
-        Working_Hours: `De segunda à sexta das ${time[0][0]}:${time[0][1]} as ${time[1][0]}:${time[1][1]} e de sábado à domingo de ${time[2][0]}:${time[2][1]} as ${time[3][0]}:${time[3][1]}`
+        Working_Hours: `${textFormatter.hourTextResponse(time, true)}`
     };
 
     res.status(200).send(final_result);
@@ -55,41 +57,9 @@ restaurantRoute.post('/', async (req: Request, res: Response, next: NextFunction
     ]
 
     const errors:object[] = []
-    const hour_list: number[] = []
-    const min_list: number[] = []
-    hours.map(time => {
-        console.log(`${time} - ${typeof time}`)
-        let hour_min = time.split(':');
-        let hour = hour_min[0]
-        let min = hour_min[1];
+    Error_handler.hourFormatter(hours, errors)
+    Error_handler.adressValidation(allRestaurants, newRestaurant, errors);
 
-        if(hour_min.length != 2) {
-            errors.push({message: "Valores além de hora e minutos foram digitados"})
-        }else if(hour.length != 2 || min.length != 2){
-            errors.push({message: "Numero de caracteres de hora ou minutos maiores que o normal"})
-        } else if (Number(hour) > 23 || Number(hour) < 0 && Number(min) > 59 || Number(min) < 0){
-            errors.push({message: "Horário ou minuto fora do comum"})
-        } else{
-            hour_list.push(Number(hour))
-            min_list.push(Number(min))
-        }
-    })
-    if(hour_list[0] > hour_list[1] || hour_list[2] > hour_list[3]){
-        errors.push({message: "Horário de inicio depois do horário de término"})
-    }
-    if(
-        hour_list[0] == hour_list[1] && 
-        min_list[1] - min_list[0] < 15 || 
-        hour_list[2] == hour_list[3] && 
-        min_list[3] - min_list[2] < 15
-    ){
-        errors.push({message: "Diferença entre horário de inicio e de termino deve ser maior que 15 minutos"})
-    }
-    allRestaurants.map(restaurant => {
-        if(newRestaurant.adress === restaurant.adress){
-            errors.push({message: "Endereço já existe"});
-        }
-    });
     if(errors.length == 0){
         const newRestaurantID = await restaurantRepository.addRestaurant(newRestaurant);
         res.status(200).send(newRestaurantID);

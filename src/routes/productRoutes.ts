@@ -1,45 +1,48 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import productRepository from '../repositories/productRepository';
+import Error_handler from '../errors/errors';
+import Product from '../models/Product_model';
+import textFormatter from '../controllers/textFormatter';
 const productRoute = Router();
 
 productRoute.get('/:uuid', async (req:Request, res:Response, next: NextFunction) => {
     const uuid = req.params.uuid
     const findProducts = await productRepository.findAllProductsFromRestaurant(uuid);
-    const final_result: object[] = []
-    findProducts.map( product => {
-        if(product.isinpromotion == true){
-            const promo_obj = {
-                photo: product.productphoto,
-                name: product.productname,
-                price: product.productprice,
-                promotional_price: product.promotionalprice,
-                category: product.category,
-                promotionDescription: product.promotionDescription,
-                promotionDay_open: product.promotionday_open,
-                promotionDay_end: product.promotionday_end,
-                promotionHours_open: product.promotionhours_open,
-                promotionHours_end: product.promotionhours_end
-            }
-
-            final_result.push(promo_obj)
-        } else if(product.isinpromotion == false){
-            const norm_obj = {
-                photo: product.productphoto,
-                name: product.productname,
-                price: product.productprice,
-                category: product.category,
-            }
-
-            final_result.push(norm_obj);
-        }
-    });
+    const final_result = textFormatter.promotionValidator(findProducts);
     res.status(200).send(final_result);
 });
 
 productRoute.post('/', async (req:Request, res:Response, next: NextFunction) => {
     const newProduct = req.body;
-    const final_result = await productRepository.insertProduct(newProduct);
-    res.status(201).send(final_result);
+    const hours: string[] = [
+        newProduct.promotionhours_open,
+        newProduct.promotionhours_end
+    ]
+    const errors:object[] = []
+    Error_handler.hourFormatter(hours, errors);
+
+    if(errors.length === 0){
+        const final_result = await productRepository.insertProduct(newProduct);
+        res.status(201).send(final_result);
+    } else {
+        res.status(400).send(errors);
+    }
+});
+
+productRoute.put('/:uuid', async (req:Request, res:Response, next: NextFunction) =>{
+    const uuid = req.params.uuid;
+    const updatedProduct = req.body;
+    updatedProduct.product_uuid = uuid;
+    await productRepository.updateProduct(updatedProduct);
+
+    res.status(200).json({message: `${updatedProduct.productname} atualizado com sucesso`});
+});
+
+productRoute.delete('/:uuid', async (req:Request, res:Response, next: NextFunction) =>{
+    const uuid = req.params.uuid;
+    await productRepository.deleteUser(uuid);
+
+    res.status(200).json({message: 'Produto deletado com sucesso'});
 })
 
 export default productRoute;
