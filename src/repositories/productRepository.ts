@@ -107,7 +107,7 @@ class ProductRepository{
         await db.query(query, values);
     }
 
-    async deleteUser(uuid:string): Promise<void>{
+    async deleteProduct(uuid:string): Promise<void>{
         const query = `
             DELETE FROM products_4
             WHERE product_uuid = $1

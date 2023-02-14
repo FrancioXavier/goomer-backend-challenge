@@ -102,13 +102,19 @@ class RestaurantRepository{
     }
 
     async deleteRestaurant(uuid:string): Promise<void>{
-        const query = `
+        const query_1 = `
+            DELETE FROM products_4 USING restaurantFinal
+            WHERE products_4.uuid_restaurant = restaurantFinal.uuid AND restaurantFinal.uuid = $1
+        `;
+
+        const query_2 = `
             DELETE FROM restaurantsFinal
             WHERE uuid = $1
         `;
 
         const values = [uuid];
-        await db.query(query, values);
+        await db.query(query_1, values);
+        await db.query(query_2, values);
     };
 }
 

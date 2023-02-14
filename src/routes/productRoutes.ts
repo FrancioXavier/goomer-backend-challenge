@@ -12,8 +12,10 @@ productRoute.get('/:uuid', async (req:Request, res:Response, next: NextFunction)
     res.status(200).send(final_result);
 });
 
-productRoute.post('/', async (req:Request, res:Response, next: NextFunction) => {
+productRoute.post('/:uuid', async (req:Request, res:Response, next: NextFunction) => {
+    const uuid_restaurant = req.params.uuid
     const newProduct = req.body;
+    newProduct.uuid_restaurant = uuid_restaurant;
     const hours: string[] = [
         newProduct.promotionhours_open,
         newProduct.promotionhours_end
@@ -40,7 +42,7 @@ productRoute.put('/:uuid', async (req:Request, res:Response, next: NextFunction)
 
 productRoute.delete('/:uuid', async (req:Request, res:Response, next: NextFunction) =>{
     const uuid = req.params.uuid;
-    await productRepository.deleteUser(uuid);
+    await productRepository.deleteProduct(uuid);
 
     res.status(200).json({message: 'Produto deletado com sucesso'});
 })
